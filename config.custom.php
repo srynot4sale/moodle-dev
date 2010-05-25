@@ -2,35 +2,60 @@
 
 /// Moodle Configuration File
 /// FOR LOCAL DEVELOPMENT ONLY
+///
+/// Expects the following file structure:
+///
+/// .configs/{$gitbranch}.php -- branch specific config files
+/// {$subdomain}/htdocs -- document root / moodle checkout
+/// {$subdomain}/moodledata -- moodle data directory
+///
+///
+/// Also expects postgres databases to be named after the
+/// associated git branch
 
+
+$CFG = new stdClass();
+
+// Get installations file path
 $ROOT = substr($_SERVER['SCRIPT_FILENAME'], 0, 0 - strlen($_SERVER['SCRIPT_NAME']));
 
-// get git details
+// Get currently checked out git branch
 $GIT_HEAD = file_get_contents($ROOT.'/.git/HEAD');
 $GIT_BRANCH = trim(substr($GIT_HEAD, 16));
 
-$CFG            = new stdClass();
-$CFG->dbtype    = 'postgres7';
-$CFG->dbhost    = 'user=\'user\' password=\'password\' dbname=\''.$GIT_BRANCH.'\'';
-$CFG->dbpersist =  false;
-$CFG->prefix    = 'mdl_';
 
+// Paths
 $CFG->wwwroot   = 'http://'.$_SERVER['SERVER_NAME'];
 $CFG->dirroot   = $ROOT;
 $CFG->dataroot  = dirname($ROOT).'/moodledata/';
-$CFG->admin     = 'admin';
-
 $CFG->directorypermissions = 00777;  // try 02777 on a server in Safe Mode
 
+// Database connection
+$CFG->dbtype    = 'postgres7';
+$CFG->dbhost    = '';
+$CFG->dbuser    = 'user';
+$CFG->dbpass    = 'password';
+$CFG->dbname    = "'{$GIT_BRANCH}'";
+$CFG->dbpersist =  false;
+$CFG->prefix    = 'mdl_';
+
+// Debugging
 $CFG->debug = 38911;
 $CFG->debugdisplay = 0;
 
-// Grab custom stuff
+// Misc
+$CFG->admin     = 'admin';
+
+
+// Grab custom config file
+// Create one per git branch, overwrite/add to $CFG from them
 $CUSTOM = dirname(dirname($ROOT)).'/.configs/'.$GIT_BRANCH.'.php';
 if (file_exists($CUSTOM)) {
     require_once $CUSTOM;
 }
 
+// Debugging variable to check your config
+// ?magicponies=1
 if (!empty($_GET['magicponies'])) {
     echo '<pre>';
     var_dump($CFG);
@@ -40,4 +65,4 @@ if (!empty($_GET['magicponies'])) {
 
 unset($CUSTOM, $ROOT, $DIRNAME, $GIT_HEAD, $GIT_BRANCH);
 
-require_once("$CFG->dirroot/lib/setup.php");
+require_once("{$CFG->dirroot}/lib/setup.php");
