@@ -1,0 +1,12 @@
+Moodle Configuration File
+FOR LOCAL DEVELOPMENT ONLY
+
+Expects the following file structure:
+
+/var/www/moodle/.configs/{$gitbranch}.php -- branch specific config files
+/var/www/moodle/{$subdomain}/htdocs -- document root / moodle checkout
+/var/www/moodle/{$subdomain}/moodledata -- moodle data directory
+
+
+Also expects postgres databases to be named after the
+associated git branch

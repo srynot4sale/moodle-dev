@@ -5,9 +5,9 @@
 ///
 /// Expects the following file structure:
 ///
-/// .configs/{$gitbranch}.php -- branch specific config files
-/// {$subdomain}/htdocs -- document root / moodle checkout
-/// {$subdomain}/moodledata -- moodle data directory
+/// /var/www/moodle/.configs/{$gitbranch}.php -- branch specific config files
+/// /var/www/moodle/{$subdomain}/htdocs -- document root / moodle checkout
+/// /var/www/moodle/{$subdomain}/moodledata -- moodle data directory
 ///
 ///
 /// Also expects postgres databases to be named after the
