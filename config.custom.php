@@ -18,10 +18,19 @@ $CFG = new stdClass();
 
 // Get installations file path
 $ROOT = substr($_SERVER['SCRIPT_FILENAME'], 0, 0 - strlen($_SERVER['SCRIPT_NAME']));
+$CUSTOM_CONFIGS = dirname(dirname($ROOT)).'/.configs';
 
 // Get currently checked out git branch
 $GIT_HEAD = file_get_contents($ROOT.'/.git/HEAD');
 $GIT_BRANCH = trim(substr($GIT_HEAD, 16));
+
+// Check if checked out git branch is not a real branch
+if (!file_exists($ROOT.'/.git/refs/heads/'.$GIT_BRANCH)) {
+    // Use default database instead (if set)
+    if (file_exists($CUSTOM_CONFIGS.'/default_db')) {
+        $GIT_BRANCH = trim(file_get_contents($CUSTOM_CONFIGS.'/default_db'));
+    }
+}
 
 
 // Paths
@@ -46,10 +55,9 @@ $CFG->debugdisplay = 0;
 // Misc
 $CFG->admin     = 'admin';
 
-
 // Grab custom config file
 // Create one per git branch, overwrite/add to $CFG from them
-$CUSTOM = dirname(dirname($ROOT)).'/.configs/'.$GIT_BRANCH.'.php';
+$CUSTOM = $CUSTOM_CONFIGS.'/'.$GIT_BRANCH.'.php';
 if (file_exists($CUSTOM)) {
     require_once $CUSTOM;
 }
@@ -63,6 +71,6 @@ if (!empty($_GET['magicponies'])) {
     die();
 }
 
-unset($CUSTOM, $ROOT, $DIRNAME, $GIT_HEAD, $GIT_BRANCH);
+unset($CUSTOM, $CUSTOM_CONFIGS, $ROOT, $DIRNAME, $GIT_HEAD, $GIT_BRANCH);
 
 require_once("{$CFG->dirroot}/lib/setup.php");
