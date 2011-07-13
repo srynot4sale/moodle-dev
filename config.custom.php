@@ -42,7 +42,7 @@ $CFG->directorypermissions = 00777;  // try 02777 on a server in Safe Mode
 // Database connection
 $CFG->dbtype    = 'postgres7';
 $CFG->dbhost    = '';
-$CFG->dbuser    = 'user';
+$CFG->dbuser    = 'aaronb';
 $CFG->dbpass    = 'password';
 $CFG->dbname    = "'{$GIT_BRANCH}'";
 $CFG->dbpersist =  false;
@@ -72,5 +72,91 @@ if (!empty($_GET['magicponies'])) {
 }
 
 unset($CUSTOM, $CUSTOM_CONFIGS, $ROOT, $DIRNAME, $GIT_HEAD, $GIT_BRANCH);
+
+
+/**
+ * Magic debug functions!
+ */
+
+/**
+ * Print debug backtrace (and optional var dump) to screen,
+ * and also to a temporary file
+ */
+function magic_debug($var = 'magicstring') {
+    print '<hr style="color: red;">';
+    print '<table>';
+
+    if ($var !== 'magicstring') {
+        print '<tr><td><pre>';
+        print magic_repr($var);
+        print '</pre></td></tr>';
+    }
+
+    foreach (debug_backtrace() as $debug) {
+        print '<tr><td>';
+        print '<b>'.$debug['file'].'</b> on line '.$debug['line'].' in <b>';
+        unset($debug['file']);
+        unset($debug['line']);
+
+        if (isset($debug['class'])) {
+            print $debug['class'].'::'.$debug['function'];
+            unset($debug['class']);
+            unset($debug['function']);
+        } else {
+            print $debug['function'];
+            unset($debug['function']);
+        }
+        print '</b>';
+
+        if (!empty($debug) && !empty($debug['args'])) {
+            print '<br /><pre>';
+            print magic_repr($debug).'</pre>';
+        }
+        print '</td></tr>';
+    }
+
+    print '</table>';
+
+    magic_log();
+    print '<hr style="color: red;">';
+}
+
+/**
+ * Print debug backtrace (and optional var dump) to
+ * a temporary file
+ */
+function magic_log($var = 'magicstring') {
+    $filename = tempnam('/tmp/', 'totara');
+    $file = fopen($filename, 'w');
+    fwrite($file, magic_repr(debug_backtrace()));
+
+    if ($var !== 'magicstring') {
+        fwrite($file, "\n".magic_repr($var));
+    }
+
+    fclose($file);
+    chmod($filename, 0777);
+    error_log('------- DEBUG OUTPUT: '.$filename.' -------');
+}
+
+/**
+ * Return a string representation of a variable
+ */
+function magic_repr($var) {
+    return var_export($var, true);
+}
+
+/**
+ * Print a string representation of a variable to
+ * the error log
+ */
+function magic_shortlog($var) {
+    error_log(magic_repr($var));
+}
+
+/**
+ * End of magic debug functions
+ */
+
 
 require_once("{$CFG->dirroot}/lib/setup.php");
