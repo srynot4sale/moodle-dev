@@ -33,6 +33,8 @@ if (!file_exists($ROOT.'/.git/refs/heads/'.$GIT_BRANCH)) {
     }
 }
 
+// Check Moodle version
+$IS19 = magic_is_moodle19($ROOT);
 
 // Paths
 $CFG->wwwroot   = 'http://'.$_SERVER['SERVER_NAME'];
@@ -41,12 +43,10 @@ $CFG->dataroot  = dirname($ROOT).'/moodledata/';
 $CFG->directorypermissions = 00777;  // try 02777 on a server in Safe Mode
 
 // Database connection
-$CFG->dbtype    = 'postgres7';
+$CFG->dbtype    = $IS19 ? 'postgres7' : 'pgsql';
 $CFG->dbhost    = '';
 $CFG->dbuser    = 'username';
 $CFG->dbpass    = 'password';
-$CFG->dbname    = "'{$GIT_BRANCH}'";
-$CFG->dbpersist =  false;
 $CFG->prefix    = 'mdl_';
 
 // Debugging
@@ -55,6 +55,15 @@ $CFG->debugdisplay = 0;
 
 // Misc
 $CFG->admin     = 'admin';
+
+if ($IS19) {
+    $CFG->dbname    = "'{$GIT_BRANCH}'";
+    $CFG->dbpersist =  false;
+} else {
+    $CFG->dbname    = $GIT_BRANCH;
+    $CFG->dblibrary = 'native';
+    $CFG->dboptions = array('dbpersist' => 0, 'dbsocket' => 1);
+}
 
 // Grab custom config file
 // Create one per git branch, overwrite/add to $CFG from them
@@ -72,12 +81,17 @@ if (!empty($_GET['magicponies'])) {
     die();
 }
 
-unset($CUSTOM, $CUSTOM_CONFIGS, $ROOT, $DIRNAME, $GIT_HEAD, $GIT_BRANCH);
+unset($CUSTOM, $CUSTOM_CONFIGS, $ROOT, $DIRNAME, $GIT_HEAD, $GIT_BRANCH, $IS19);
 
 
 /**
  * Magic debug functions!
  */
+function magic_is_moodle19($root) {
+    $versionfile = file_get_contents($root.'/version.php');
+    return strpos($versionfile, '$branch') === FALSE;
+}
+
 
 /**
  * Print debug backtrace (and optional var dump) to screen,
