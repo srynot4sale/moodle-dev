@@ -13,7 +13,8 @@
 /// Also expects postgres databases to be named after the
 /// associated git branch
 
-
+unset($CFG);
+global $CFG;
 $CFG = new stdClass();
 
 // Get installations file path
