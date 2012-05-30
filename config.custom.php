@@ -43,7 +43,7 @@ $CFG->directorypermissions = 00777;  // try 02777 on a server in Safe Mode
 // Database connection
 $CFG->dbtype    = 'postgres7';
 $CFG->dbhost    = '';
-$CFG->dbuser    = 'aaronb';
+$CFG->dbuser    = 'username';
 $CFG->dbpass    = 'password';
 $CFG->dbname    = "'{$GIT_BRANCH}'";
 $CFG->dbpersist =  false;
