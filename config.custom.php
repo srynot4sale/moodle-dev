@@ -89,7 +89,8 @@ unset($CUSTOM, $CUSTOM_CONFIGS, $ROOT, $DIRNAME, $GIT_HEAD, $GIT_BRANCH, $IS19);
  */
 function magic_is_moodle19($root) {
     $versionfile = file_get_contents($root.'/version.php');
-    return strpos($versionfile, '$branch') === FALSE;
+    $branchcheck = '/^\$(branch|release\s*=\s*\'2)/m';
+    return preg_match($branchcheck, $versionfile) == 0;
 }
 
 
