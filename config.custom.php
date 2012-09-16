@@ -63,6 +63,17 @@ if ($IS19) {
     $CFG->dbname    = $GIT_BRANCH;
     $CFG->dblibrary = 'native';
     $CFG->dboptions = array('dbpersist' => 0, 'dbsocket' => 1);
+
+    $CFG->themedesignermode = true;
+    $CFG->cachejs = false;
+    $CFG->langstringcache = false;
+
+    $CFG->perfdebug = 15; // performance info in footer
+    $CFG->passwordpolicy = false; // no annoying password restrictions
+
+    $CFG->unittestprefix = 'phpu_';
+    $CFG->phpunit_prefix = 'phpu_';
+    $CFG->phpunit_dataroot = dirname($ROOT).'/testdata/';
 }
 
 // Grab custom config file
