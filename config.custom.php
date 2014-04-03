@@ -18,7 +18,18 @@ global $CFG;
 $CFG = new stdClass();
 
 // Get installations file path
-$ROOT = substr($_SERVER['SCRIPT_FILENAME'], 0, 0 - strlen($_SERVER['SCRIPT_NAME']));
+if (!empty($_SERVER['SCRIPT_FILENAME'])) {
+    $ROOT = substr($_SERVER['SCRIPT_FILENAME'], 0, 0 - strlen($_SERVER['SCRIPT_NAME']));
+} else {
+    $ROOT = '';
+}
+
+if (!$ROOT) {
+    $ROOT = substr($_SERVER['PWD'], 0, strpos($_SERVER['PWD'], '/htdocs')).'/htdocs';
+    $ROOT_ELEMENTS = explode('/', $ROOT);
+    $_SERVER['SERVER_NAME'] = $ROOT_ELEMENTS[6].'.moodle.spastk.wgtn.cat-it.co.nz';
+    unset($ROOT_ELEMENTS);
+}
 $CUSTOM_CONFIGS = dirname(dirname($ROOT)).'/.configs';
 
 // Get currently checked out git branch
@@ -50,7 +61,7 @@ $CFG->dbpass    = 'password';
 $CFG->prefix    = 'mdl_';
 
 // Debugging
-$CFG->debug = 38911;
+$CFG->debug = E_ALL;
 $CFG->debugdisplay = 0;
 
 // Misc
@@ -62,7 +73,10 @@ if ($IS19) {
 } else {
     $CFG->dbname    = $GIT_BRANCH;
     $CFG->dblibrary = 'native';
-    $CFG->dboptions = array('dbpersist' => 0, 'dbsocket' => 1);
+    $CFG->dboptions = array('dbpersist' => 0);
+
+    $CFG->sessionhandler = 'file';
+    $CFG->sessionsavepath = '';
 
     $CFG->themedesignermode = true;
     $CFG->cachejs = false;
@@ -74,11 +88,20 @@ if ($IS19) {
     $CFG->unittestprefix = 'phpu_';
     $CFG->phpunit_prefix = 'phpu_';
     $CFG->phpunit_dataroot = dirname($ROOT).'/testdata/';
+
+    $CFG->behat_prefix = 'be_';
+    $CFG->behat_dataroot = dirname($ROOT).'/behatdata/';
 }
 
 // Grab custom config file
 // Create one per git branch, overwrite/add to $CFG from them
 $CUSTOM = $CUSTOM_CONFIGS.'/'.$GIT_BRANCH.'.php';
+if (file_exists($CUSTOM)) {
+    require_once $CUSTOM;
+}
+
+// Grab checkout config file
+$CUSTOM = dirname($ROOT).'/.config.php';
 if (file_exists($CUSTOM)) {
     require_once $CUSTOM;
 }
